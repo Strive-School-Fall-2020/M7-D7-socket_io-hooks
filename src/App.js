@@ -5,10 +5,10 @@ import io from "socket.io-client";
 import { Modal, InputGroup, FormControl, Button } from "react-bootstrap";
 
 const connOpt = {
-  transports: ["websocket", "polling"],
+  transports: ["websocket"], // socket connectin options
 };
 
-let socket = io("https://striveschool.herokuapp.com/", connOpt);
+let socket = io("https://striveschool.herokuapp.com/", connOpt); //socket instance
 
 function App() {
   const [username, setUsername] = useState(null);
@@ -18,23 +18,29 @@ function App() {
 
   useEffect(() => {
     socket.on("bmsg", (msg) => setMessages((messages) => messages.concat(msg)));
+    //listening to any event of type "bmsg" and reacting by calling the function
+    //that will append a new message to the "messages" array
 
-    socket.on("connect", () => console.log("connected to socket"));
+    socket.on("connect", () => console.log("connected to socket")); //check if socket is connected
+
+    return () => socket.removeAllListeners(); //componentWillUnmount
   }, []);
 
   const handleMessage = (e) => {
-    setMessage(e.currentTarget.value);
+    setMessage(e.currentTarget.value); //saving the message text in the state
   };
 
   const sendMessage = (e) => {
     e.preventDefault();
+
     if (message !== "") {
       socket.emit("bmsg", {
-        user: username,
-        message: message,
+        //emitting an event with a payload to send the message to all connected users
+        user: username, //state.username
+        message: message, //state.message
       });
 
-      setMessage("");
+      setMessage(""); //resets the message text
     }
   };
 
@@ -46,7 +52,10 @@ function App() {
     <>
       <div className="App">
         <ul id="messages">
-          {messages.map((msg, i) => (
+          {messages.map((
+            msg,
+            i //displays all new messages
+          ) => (
             <li
               key={i}
               className={msg.user === username ? "ownMessage" : "message"}
